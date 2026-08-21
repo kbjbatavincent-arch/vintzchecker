@@ -1,0 +1,459 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Vintz.co Generator ADS/PHISING (Online Sync)</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+    
+    <!-- Firebase SDK (Compat Version) -->
+    <script src="https://www.gstatic.com/firebasejs/10.8.1/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/10.8.1/firebase-database-compat.js"></script>
+</head>
+<body class="bg-slate-950 text-slate-200 min-h-screen py-8 px-4 flex justify-center items-start">
+
+    <div class="w-full max-w-2xl bg-slate-900 border border-slate-800 rounded-2xl p-6 shadow-xl space-y-6">
+        
+        <!-- Header -->
+        <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-4 border-b border-slate-800 pb-5">
+            <div>
+                <h1 class="text-xl font-bold text-white flex items-center gap-2">
+                    <span class="w-2.5 h-2.5 rounded-full bg-emerald-500 inline-block" id="statusIndicator"></span>
+                    Vintz.co Generator ADS/PHISING
+                </h1>
+                <p class="text-xs text-slate-400 mt-1" id="statusText">Menghubungkan ke database...</p>
+            </div>
+
+            <div class="flex items-center gap-2">
+                <button type="button" onclick="openDatabaseModal()" class="bg-slate-800 hover:bg-slate-700 border border-slate-700 text-xs text-slate-200 font-medium py-2 px-3 rounded-lg flex items-center gap-1.5 transition">
+                    <i class="fa-solid fa-database text-amber-400"></i> Master Data
+                </button>
+
+                <select id="reportType" onchange="toggleFormType()" class="bg-slate-800 border border-slate-700 text-xs font-semibold text-slate-200 rounded-lg px-3 py-2 focus:outline-none focus:ring-1 focus:ring-red-500">
+                    <option value="direct">REPORT PHISING</option>
+                    <option value="google">FORMAT GOOGLE / ADS</option>
+                </select>
+            </div>
+        </div>
+
+        <form id="phishingForm" class="space-y-4">
+            <div class="grid grid-cols-2 gap-3">
+                <div>
+                    <label class="block text-[11px] font-medium text-slate-400 mb-1">Korban Phishing</label>
+                    <input type="text" id="korbanPhishing" oninput="handleKorbanInput()" placeholder="KIJANGWIN" class="w-full bg-slate-950 border border-slate-800 rounded-lg px-3 py-2 text-xs text-slate-100 placeholder-slate-600 focus:outline-none focus:border-red-500">
+                </div>
+                <div>
+                    <label class="block text-[11px] font-medium text-slate-400 mb-1">Pelaku Phishing</label>
+                    <input type="text" id="pelakuPhishing" oninput="handlePelakuInput()" placeholder="NEKOJP88" class="w-full bg-slate-950 border border-slate-800 rounded-lg px-3 py-2 text-xs text-slate-100 placeholder-slate-600 focus:outline-none focus:border-red-500">
+                </div>
+            </div>
+
+            <!-- Referral Code & Dynamic Referral Link Input -->
+            <div class="space-y-3">
+                <div>
+                    <label class="block text-[11px] font-medium text-slate-400 mb-1">Referral</label>
+                    <input type="text" id="referral" oninput="handleReferralInput()" placeholder="KVackYo7 atau -" class="w-full bg-slate-950 border border-slate-800 rounded-lg px-3 py-2 text-xs text-slate-100 placeholder-slate-600 focus:outline-none focus:border-red-500">
+                </div>
+                
+                <div id="sectionLinkReferral" class="hidden">
+                    <label class="block text-[11px] font-medium text-amber-400 mb-1 flex items-center gap-1">
+                        <i class="fa-solid fa-link text-[10px]"></i> Link Referral
+                    </label>
+                    <input type="url" id="linkReferral" placeholder="https://..." class="w-full bg-slate-950 border border-amber-500/40 rounded-lg px-3 py-2 text-xs text-slate-100 focus:outline-none focus:border-amber-400">
+                </div>
+            </div>
+
+            <div class="grid grid-cols-3 gap-3">
+                <div>
+                    <label class="block text-[11px] font-medium text-slate-400 mb-1">Page</label>
+                    <input type="number" id="kwPage" value="1" min="1" oninput="updateKWPreview()" class="w-full bg-slate-950 border border-slate-800 rounded-lg px-3 py-2 text-xs text-slate-100 focus:outline-none focus:border-red-500">
+                </div>
+                <div>
+                    <label class="block text-[11px] font-medium text-slate-400 mb-1">Rank</label>
+                    <input type="number" id="kwRank" value="1" min="1" oninput="updateKWPreview()" class="w-full bg-slate-950 border border-slate-800 rounded-lg px-3 py-2 text-xs text-slate-100 focus:outline-none focus:border-red-500">
+                </div>
+                <div id="kwTypeWrapper" class="hidden">
+                    <label class="block text-[11px] font-medium text-slate-400 mb-1">Tipe Result</label>
+                    <select id="kwType" onchange="updateKWPreview()" class="w-full bg-slate-950 border border-slate-800 rounded-lg px-3 py-2 text-xs text-slate-100 focus:outline-none focus:border-red-500">
+                        <option value="ADS">ADS</option>
+                    </select>
+                </div>
+            </div>
+
+            <div>
+                <label class="block text-[11px] font-medium text-slate-500 mb-1">Format KW Preview</label>
+                <input type="text" id="kwPreview" readonly class="w-full bg-slate-950/60 border border-slate-800 text-amber-400 font-mono rounded-lg px-3 py-2 text-xs focus:outline-none cursor-default">
+            </div>
+
+            <div id="sectionDirect" class="space-y-3 pt-2">
+                <div>
+                    <label class="block text-[11px] font-medium text-slate-400 mb-1">Link Desktop</label>
+                    <input type="url" id="linkDesktop" placeholder="https://..." class="w-full bg-slate-950 border border-slate-800 rounded-lg px-3 py-2 text-xs text-slate-100 focus:outline-none focus:border-red-500">
+                </div>
+                <div>
+                    <label class="block text-[11px] font-medium text-slate-400 mb-1">Link AMP</label>
+                    <input type="url" id="linkAmp" placeholder="https://..." class="w-full bg-slate-950 border border-slate-800 rounded-lg px-3 py-2 text-xs text-slate-100 focus:outline-none focus:border-red-500">
+                </div>
+                <div>
+                    <label class="block text-[11px] font-medium text-slate-400 mb-1">Link Button</label>
+                    <input type="url" id="linkButton" placeholder="https://..." class="w-full bg-slate-950 border border-slate-800 rounded-lg px-3 py-2 text-xs text-slate-100 focus:outline-none focus:border-red-500">
+                </div>
+                <div>
+                    <label class="block text-[11px] font-medium text-slate-400 mb-1">Link Tujuan</label>
+                    <input type="url" id="linkTujuan" placeholder="https://..." class="w-full bg-slate-950 border border-slate-800 rounded-lg px-3 py-2 text-xs text-slate-100 focus:outline-none focus:border-red-500">
+                </div>
+            </div>
+
+            <div id="sectionGoogle" class="space-y-3 pt-2 hidden">
+                <div>
+                    <label class="block text-[11px] font-medium text-slate-400 mb-1">URL Google</label>
+                    <input type="url" id="urlGoogle" placeholder="https://..." class="w-full bg-slate-950 border border-slate-800 rounded-lg px-3 py-2 text-xs text-slate-100 focus:outline-none focus:border-red-500">
+                </div>
+                <div>
+                    <label class="block text-[11px] font-medium text-slate-400 mb-1">URL Referral</label>
+                    <input type="url" id="urlReferral" placeholder="https://..." class="w-full bg-slate-950 border border-slate-800 rounded-lg px-3 py-2 text-xs text-slate-100 focus:outline-none focus:border-red-500">
+                </div>
+            </div>
+
+            <div class="pt-3 flex gap-2">
+                <button type="button" onclick="generateReport()" class="flex-1 bg-red-600 hover:bg-red-500 text-white font-medium py-2 px-4 rounded-lg text-xs transition duration-150 flex items-center justify-center gap-2">
+                    <i class="fa-solid fa-wand-magic-sparkles"></i> Generate Format
+                </button>
+            </div>
+        </form>
+
+        <div class="pt-2 border-t border-slate-800 space-y-2">
+            <div class="flex items-center justify-between">
+                <label class="block text-[11px] font-medium text-emerald-400">KOLOM 1: Format Laporan Utama</label>
+                <button type="button" onclick="copyResult()" class="text-xs bg-emerald-600/20 hover:bg-emerald-600/30 text-emerald-300 font-medium py-1 px-3 rounded border border-emerald-500/30 transition duration-150 flex items-center gap-1.5">
+                    <i class="fa-regular fa-copy"></i> Salin Kolom 1
+                </button>
+            </div>
+            <textarea id="outputFormat" rows="11" readonly class="w-full bg-slate-950 border border-slate-800 text-emerald-400 font-mono text-xs rounded-lg p-3 focus:outline-none resize-none" placeholder="Hasil format utama akan muncul di sini..."></textarea>
+        </div>
+
+        <div id="extraOutputWrapper" class="pt-2 space-y-2">
+            <div class="flex items-center justify-between">
+                <label class="block text-[11px] font-medium text-cyan-400">SEND to WA</label>
+                <button type="button" onclick="copyExtraResult()" class="text-xs bg-cyan-600/20 hover:bg-cyan-600/30 text-cyan-300 font-medium py-1 px-3 rounded border border-cyan-500/30 transition duration-150 flex items-center gap-1.5">
+                    <i class="fa-regular fa-copy"></i> Salin SEND to WA
+                </button>
+            </div>
+            <textarea id="extraOutputFormat" rows="3" readonly class="w-full bg-slate-950 border border-slate-800 text-cyan-300 font-mono text-xs rounded-lg p-3 focus:outline-none resize-none" placeholder="Pesan untuk SEND to WA akan muncul terpisah di sini..."></textarea>
+        </div>
+    </div>
+
+    <!-- MODAL DATABASE -->
+    <div id="dbModal" class="fixed inset-0 bg-slate-950/80 backdrop-blur-sm hidden flex justify-center items-center p-4 z-50">
+        <div class="bg-slate-900 border border-slate-800 rounded-2xl w-full max-w-md p-5 space-y-4 shadow-2xl">
+            <div class="flex justify-between items-center border-b border-slate-800 pb-3">
+                <h3 class="text-sm font-bold text-white flex items-center gap-2">
+                    <i class="fa-solid fa-database text-amber-400"></i> Master Data Brand & Provider
+                </h3>
+                <button type="button" onclick="closeDatabaseModal()" class="text-slate-400 hover:text-white text-sm">
+                    <i class="fa-solid fa-xmark"></i>
+                </button>
+            </div>
+
+            <div class="grid grid-cols-2 gap-2">
+                <div>
+                    <label class="block text-[10px] text-slate-400 mb-1">Nama Brand</label>
+                    <input type="text" id="newBrand" placeholder="cth: KIJANGWIN" class="w-full bg-slate-950 border border-slate-800 rounded px-2.5 py-1.5 text-xs text-white focus:outline-none focus:border-amber-400">
+                </div>
+                <div>
+                    <label class="block text-[10px] text-slate-400 mb-1">Provider</label>
+                    <input type="text" id="newProvider" placeholder="cth: TMT" class="w-full bg-slate-950 border border-slate-800 rounded px-2.5 py-1.5 text-xs text-white focus:outline-none focus:border-amber-400">
+                </div>
+            </div>
+            <button type="button" onclick="addMasterData()" class="w-full bg-amber-600 hover:bg-amber-500 text-white font-medium py-1.5 px-3 rounded text-xs transition">
+                + Tambah ke Database
+            </button>
+
+            <div class="max-h-52 overflow-y-auto border border-slate-800 rounded-lg">
+                <table class="w-full text-left text-xs">
+                    <thead class="bg-slate-950 text-slate-400 border-b border-slate-800 sticky top-0">
+                        <tr>
+                            <th class="p-2">Brand</th>
+                            <th class="p-2">Provider</th>
+                            <th class="p-2 text-right">Aksi</th>
+                        </tr>
+                    </thead>
+                    <tbody id="dbTableBody" class="divide-y divide-slate-800 text-slate-300">
+                        <tr><td colspan="3" class="p-3 text-center text-slate-500 italic">Memuat database online...</td></tr>
+                    </tbody>
+                </table>
+            </div>
+
+            <div class="text-right pt-1">
+                <button type="button" onclick="closeDatabaseModal()" class="bg-slate-800 hover:bg-slate-700 text-slate-300 text-xs py-1.5 px-4 rounded">Tutup</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- SCRIPT LOGIC -->
+    <script>
+        const firebaseConfig = {
+            apiKey: "AIzaSyCNl5J9CN-8pc1Gi-_cPuty5nS2br-DgG4",
+            authDomain: "vintz-tools.firebaseapp.com",
+            databaseURL: "https://vintz-tools-default-rtdb.asia-southeast1.firebasedatabase.app",
+            projectId: "vintz-tools",
+            storageBucket: "vintz-tools.firebasestorage.app",
+            messagingSenderId: "965368850321",
+            appId: "1:965368850321:web:a1e632318e643ffdad9c30",
+            measurementId: "G-B7TXLSSKH6"
+        };
+
+        firebase.initializeApp(firebaseConfig);
+        const db = firebase.database();
+        const dbRef = db.ref('vintz_master_data');
+
+        let globalDB = {};
+        const NOT_FOUND_TEXT = 'BELUM DITAMBAHKAN';
+        let currentProviderKorban = null;
+        let currentProviderPelaku = null;
+
+        dbRef.on('value', (snapshot) => {
+            const data = snapshot.val();
+            globalDB = data || {};
+            
+            const statusText = document.getElementById('statusText');
+            const statusIndicator = document.getElementById('statusIndicator');
+            
+            if (statusText && statusIndicator) {
+                statusText.innerText = "Online - Database Terhubung";
+                statusText.className = "text-xs text-emerald-400 mt-1";
+                statusIndicator.className = "w-2.5 h-2.5 rounded-full bg-emerald-500 inline-block";
+            }
+            
+            renderDatabaseTable();
+            handleKorbanInput();
+            handlePelakuInput();
+        }, (error) => {
+            console.error("Firebase Error:", error);
+            const statusText = document.getElementById('statusText');
+            const statusIndicator = document.getElementById('statusIndicator');
+            
+            if (statusText && statusIndicator) {
+                statusText.innerText = "Offline - Periksa Rules Firebase";
+                statusText.className = "text-xs text-red-400 mt-1";
+                statusIndicator.className = "w-2.5 h-2.5 rounded-full bg-red-500 inline-block";
+            }
+        });
+
+        function openDatabaseModal() {
+            renderDatabaseTable();
+            document.getElementById('dbModal').classList.remove('hidden');
+        }
+
+        function closeDatabaseModal() {
+            document.getElementById('dbModal').classList.add('hidden');
+        }
+
+        function renderDatabaseTable() {
+            const tbody = document.getElementById('dbTableBody');
+            if (!tbody) return;
+            tbody.innerHTML = '';
+
+            const keys = Object.keys(globalDB);
+            if (keys.length === 0) {
+                tbody.innerHTML = `<tr><td colspan="3" class="p-3 text-center text-slate-500 italic">Belum ada data tersimpan. Silakan tambah data baru.</td></tr>`;
+                return;
+            }
+
+            keys.forEach(brand => {
+                const provider = globalDB[brand];
+                const tr = document.createElement('tr');
+                tr.className = 'hover:bg-slate-800/40';
+                tr.innerHTML = `
+                    <td class="p-2 font-semibold text-white">${brand}</td>
+                    <td class="p-2 text-slate-300">${provider}</td>
+                    <td class="p-2 text-right">
+                        <button type="button" onclick="deleteMasterData('${brand}')" class="text-red-400 hover:text-red-300 px-1">
+                            <i class="fa-regular fa-trash-can"></i>
+                        </button>
+                    </td>
+                `;
+                tbody.appendChild(tr);
+            });
+        }
+
+        function addMasterData() {
+            const brandInput = document.getElementById('newBrand').value.trim().toUpperCase();
+            const providerInput = document.getElementById('newProvider').value.trim().toUpperCase();
+
+            if (!brandInput || !providerInput) {
+                alert('Nama Brand dan Provider wajib diisi!');
+                return;
+            }
+            
+            db.ref('vintz_master_data/' + brandInput).set(providerInput)
+                .then(() => {
+                    document.getElementById('newBrand').value = '';
+                    document.getElementById('newProvider').value = '';
+                })
+                .catch((error) => alert('Gagal menyimpan: ' + error));
+        }
+
+        function deleteMasterData(brand) {
+            if (confirm(`Hapus brand "${brand}" dari database online?`)) {
+                db.ref('vintz_master_data/' + brand).remove();
+            }
+        }
+
+        function handleKorbanInput() {
+            updateKWPreview();
+            const korbanInput = document.getElementById('korbanPhishing').value.trim().toUpperCase();
+            currentProviderKorban = globalDB[korbanInput] || null;
+        }
+
+        function handlePelakuInput() {
+            const pelakuInput = document.getElementById('pelakuPhishing').value.trim().toUpperCase();
+            currentProviderPelaku = globalDB[pelakuInput] || null;
+        }
+
+        function handleReferralInput() {
+            const referralVal = document.getElementById('referral').value.trim();
+            const sectionLinkRef = document.getElementById('sectionLinkReferral');
+            
+            if (referralVal !== '' && referralVal !== '-') {
+                sectionLinkRef.classList.remove('hidden');
+            } else {
+                sectionLinkRef.classList.add('hidden');
+                document.getElementById('linkReferral').value = '';
+            }
+        }
+
+        function toggleFormType() {
+            const reportType = document.getElementById('reportType').value;
+            if (reportType === 'google') {
+                document.getElementById('sectionGoogle').classList.remove('hidden');
+                document.getElementById('sectionDirect').classList.add('hidden');
+                document.getElementById('kwTypeWrapper').classList.remove('hidden');
+            } else {
+                document.getElementById('sectionGoogle').classList.add('hidden');
+                document.getElementById('sectionDirect').classList.remove('hidden');
+                document.getElementById('kwTypeWrapper').classList.add('hidden');
+            }
+            updateKWPreview();
+        }
+
+        function updateKWPreview() {
+            const reportType = document.getElementById('reportType').value;
+            const korban = document.getElementById('korbanPhishing').value.trim() || '[KORBAN]';
+            const page = document.getElementById('kwPage').value || '1';
+            const rank = document.getElementById('kwRank').value || '1';
+            let kwFormatted = '';
+
+            if (reportType === 'google') {
+                const type = document.getElementById('kwType').value;
+                kwFormatted = `${korban.toUpperCase()} ( PAGE ${page} RANK ${rank} ${type} )`;
+            } else {
+                kwFormatted = `${korban.toUpperCase()} ( PAGE ${page} RANK ${rank} )`;
+            }
+            document.getElementById('kwPreview').value = kwFormatted;
+            return kwFormatted;
+        }
+
+        function getTodayFormatted() {
+            const today = new Date();
+            return today.toLocaleDateString('id-ID', { day: 'numeric', month: 'long', year: 'numeric' }).toUpperCase();
+        }
+
+        function generateReport() {
+            const korbanInput = document.getElementById('korbanPhishing').value.trim().toUpperCase();
+            const pelakuInput = document.getElementById('pelakuPhishing').value.trim().toUpperCase();
+
+            handleKorbanInput();
+            handlePelakuInput();
+
+            let missingData = [];
+
+            if (korbanInput && !currentProviderKorban) {
+                missingData.push(`Korban "${korbanInput}"`);
+            }
+            if (pelakuInput && !currentProviderPelaku) {
+                missingData.push(`Pelaku "${pelakuInput}"`);
+            }
+
+            if (missingData.length > 0) {
+                alert(`Gagal Generate Format!\n\nData berikut BELUM DITAMBAHKAN ke Master Data:\n- ${missingData.join('\n- ')}\n\nSilakan tambahkan ke Master Data terlebih dahulu.`);
+                return;
+            }
+
+            const tglMulai = getTodayFormatted();
+            const korban = korbanInput || '-';
+            const providerKorban = currentProviderKorban || '-';
+            const pelaku = pelakuInput || '-';
+            const providerPelaku = currentProviderPelaku || '-';
+            
+            const referralVal = document.getElementById('referral').value.trim();
+            const linkReferralVal = document.getElementById('linkReferral').value.trim();
+            
+            const referral = referralVal || '-';
+            const keywordFormatted = updateKWPreview();
+            const reportType = document.getElementById('reportType').value;
+
+            // Membuat string link referral di bawah link tujuan jika diisi
+            let textLinkReferral = '';
+            if (referralVal !== '' && referralVal !== '-' && linkReferralVal !== '') {
+                textLinkReferral = `\n\nLINK REFERRAL :\n* ${linkReferralVal}`;
+            }
+
+            if (reportType === 'direct') {
+                const linkDesktop = document.getElementById('linkDesktop').value.trim() || '-';
+                let linkAmpRaw = document.getElementById('linkAmp').value.trim();
+                if (linkAmpRaw) {
+                    linkAmpRaw = linkAmpRaw.replace(/^(https?:\/\/)?(www\.)?google\.com\/amp\/s\//i, 'https://');
+                }
+                const linkAmp = linkAmpRaw || '-';
+                const linkButton = document.getElementById('linkButton').value.trim() || '-';
+                const linkTujuan = document.getElementById('linkTujuan').value.trim() || '-';
+
+                document.getElementById('outputFormat').value = `MULAI PHISING : ${tglMulai}\nKORBAN PHISING : ${korban}\nPROVIDER KORBAN : ${providerKorban}\nPELAKU PHISING : ${pelaku}\nPROVIDER PHISING : ${providerPelaku}\nREFERRAL : ${referral}\nKW : ${keywordFormatted}\n\nLINK PHISHING VIA DESKTOP :\n* ${linkDesktop}\n\nLINK AMP :\n* ${linkAmp}\n\nLINK BUTTON :\n* ${linkButton}\n\nLINK TUJUAN :\n* ${linkTujuan}${textLinkReferral}`;
+                
+                const valLower = providerPelaku.toLowerCase();
+                if (valLower.includes('scam')) {
+                    document.getElementById('extraOutputFormat').value = 'dibantu nawalakan phising tersebut ya bang,terima kasih';
+                } else if (providerPelaku === NOT_FOUND_TEXT || providerPelaku === '-' || providerPelaku === '') {
+                    document.getElementById('extraOutputFormat').value = 'dibantu nawalakan/takedownkan phising tersebut ya bang,terima kasih';
+                } else {
+                    document.getElementById('extraOutputFormat').value = 'dibantu takedownkan phising tersebut ya bang,terima kasih';
+                }
+            } else {
+                const urlGoogle = document.getElementById('urlGoogle').value.trim() || '-';
+                const urlReferral = document.getElementById('urlReferral').value.trim() || '-';
+
+                document.getElementById('outputFormat').value = `MULAI PHISING : ${tglMulai}\nKORBAN PHISING : ${korban}\nPROVIDER KORBAN : ${providerKorban}\nPELAKU PHISING : ${pelaku}\nPROVIDER PHISING : ${providerPelaku}\nREFERRAL : ${referral}\nKW : ${keywordFormatted}\n\nURL GOOGLE :\n${urlGoogle}\n\nURL REFFERAL :\n${urlReferral}${textLinkReferral}`;
+                
+                const kwText = korbanInput ? korbanInput.toLowerCase() : '';
+                document.getElementById('extraOutputFormat').value = `Tolong dibantu negatifkan dari KW ${kwText} ya Pak`;
+            }
+        }
+
+        function copyResult() {
+            const outputTextarea = document.getElementById('outputFormat');
+            if (!outputTextarea.value) {
+                alert('Silakan tekan tombol "Generate Format" terlebih dahulu!');
+                return;
+            }
+            outputTextarea.select();
+            document.execCommand('copy');
+            alert('Kolom 1 berhasil disalin!');
+        }
+
+        function copyExtraResult() {
+            const extraTextarea = document.getElementById('extraOutputFormat');
+            if (!extraTextarea.value) {
+                alert('Pesan belum tersedia. Tekan "Generate Format" terlebih dahulu!');
+                return;
+            }
+            extraTextarea.select();
+            document.execCommand('copy');
+            alert('Pesan SEND to WA berhasil disalin!');
+        }
+        
+        toggleFormType();
+    </script>
+</body>
+</html>

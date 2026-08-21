@@ -1,0 +1,882 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>VINTZ.CO REPORT GENERATOR</title>
+
+<style>
+* {
+    box-sizing: border-box;
+    margin: 0;
+    padding: 0;
+}
+
+body {
+    font-family: Arial, Helvetica, sans-serif;
+    background: #0a0a0a;
+    color: #ffffff;
+    min-height: 100vh;
+    padding: 30px 15px;
+}
+
+.container {
+    max-width: 900px;
+    margin: auto;
+}
+
+/* HEADER & LOGO */
+.header {
+    text-align: center;
+    margin-bottom: 25px;
+}
+
+.logo-container {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    margin-bottom: 12px;
+}
+
+.brand-logo {
+    width: 90px;
+    height: auto;
+    filter: drop-shadow(0 0 12px rgba(0, 245, 255, 0.4));
+    transition: transform 0.3s ease;
+}
+
+.brand-logo:hover {
+    transform: scale(1.05);
+}
+
+.header h1 {
+    color: #00f5ff;
+    font-size: 28px;
+    margin-bottom: 8px;
+    letter-spacing: 1px;
+}
+
+.header p {
+    color: #888;
+    font-size: 14px;
+}
+
+/* CARD */
+.card {
+    background: #151515;
+    border: 1px solid #292929;
+    border-radius: 16px;
+    padding: 25px;
+    margin-bottom: 20px;
+    box-shadow: 0 0 25px rgba(0,245,255,0.05);
+}
+
+.card-title {
+    color: #ffd600;
+    font-size: 18px;
+    font-weight: bold;
+    margin-bottom: 20px;
+}
+
+/* FORM ELEMENTS */
+.form-group {
+    margin-bottom: 22px;
+}
+
+.form-group label {
+    display: block;
+    color: #00f5ff;
+    font-size: 14px;
+    font-weight: bold;
+    margin-bottom: 8px;
+}
+
+select, input[type="text"] {
+    width: 100%;
+    height: 48px;
+    padding: 0 14px;
+    border-radius: 9px;
+    border: 1px solid #333;
+    background: #0d0d0d;
+    color: white;
+    outline: none;
+    font-size: 14px;
+}
+
+select {
+    cursor: pointer;
+}
+
+select:focus, input:focus {
+    border-color: #00f5ff;
+    box-shadow: 0 0 8px rgba(0,245,255,0.15);
+}
+
+select option {
+    background: #151515;
+    color: white;
+}
+
+.url-row {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    margin-bottom: 12px;
+}
+
+.url-number {
+    width: 85px;
+    min-width: 85px;
+    height: 45px;
+    border-radius: 8px;
+    background: #222;
+    color: #00f5ff;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-weight: bold;
+    font-size: 10px;
+    text-align: center;
+}
+
+.counter {
+    text-align: right;
+    color: #666;
+    font-size: 12px;
+    margin-top: 5px;
+}
+
+/* DYNAMIC FIELD TOGGLES */
+.dynamic-field {
+    display: none;
+}
+
+/* BUTTONS */
+.buttons {
+    display: flex;
+    gap: 10px;
+    margin-top: 22px;
+}
+
+button {
+    border: none;
+    border-radius: 9px;
+    height: 45px;
+    padding: 0 18px;
+    font-weight: bold;
+    cursor: pointer;
+    transition: 0.2s;
+}
+
+button:hover {
+    transform: translateY(-2px);
+    opacity: 0.9;
+}
+
+.generate {
+    flex: 1;
+    background: #00f5ff;
+    color: #000;
+}
+
+.copy {
+    flex: 1;
+    background: #ffd600;
+    color: #000;
+}
+
+.reset {
+    background: #292929;
+    color: white;
+}
+
+/* RESULT */
+textarea {
+    width: 100%;
+    min-height: 550px;
+    resize: vertical;
+    padding: 16px;
+    border-radius: 10px;
+    border: 1px solid #333;
+    background: #090909;
+    color: #ddd;
+    font-size: 14px;
+    line-height: 1.6;
+    outline: none;
+}
+
+textarea:focus {
+    border-color: #00f5ff;
+}
+
+/* MESSAGE */
+.message {
+    display: none;
+    margin-top: 12px;
+    padding: 11px;
+    border-radius: 8px;
+    text-align: center;
+    font-size: 13px;
+}
+
+.success {
+    background: #123b2a;
+    border: 1px solid #1c8c5a;
+    color: #65e6a8;
+}
+
+.error {
+    background: #3b1717;
+    border: 1px solid #a33;
+    color: #ff7777;
+}
+
+.footer {
+    text-align: center;
+    color: #555;
+    font-size: 12px;
+    margin-top: 15px;
+}
+
+@media(max-width: 600px) {
+    body { padding: 20px 10px; }
+    .card { padding: 18px; }
+    .header h1 { font-size: 22px; }
+    .buttons { flex-direction: column; }
+    button { width: 100%; }
+    .brand-logo { width: 75px; }
+}
+</style>
+</head>
+
+<body>
+
+<div class="container">
+
+    <div class="header">
+        <div class="logo-container">
+            <svg class="brand-logo" viewBox="0 0 300 200" fill="none" xmlns="http://www.w3.org/2000/svg">
+                <defs>
+                    <linearGradient id="tealGrad" x1="0%" y1="0%" x2="100%" y2="100%">
+                        <stop offset="0%" stop-color="#00f5ff"/>
+                        <stop offset="50%" stop-color="#008099"/>
+                        <stop offset="100%" stop-color="#003642"/>
+                    </linearGradient>
+                    <linearGradient id="orangeGrad" x1="0%" y1="0%" x2="100%" y2="100%">
+                        <stop offset="0%" stop-color="#ff7b00"/>
+                        <stop offset="100%" stop-color="#ff3c00"/>
+                    </linearGradient>
+                </defs>
+                <path d="M 40 40 L 95 160 L 135 70 L 165 130 L 205 40 L 260 160" fill="none" stroke="url(#orangeGrad)" stroke-width="18" stroke-linecap="round" stroke-linejoin="round"/>
+                <path d="M 40 40 L 95 160 L 135 70 L 165 130 L 205 40 L 260 160" fill="none" stroke="url(#tealGrad)" stroke-width="10" stroke-linecap="round" stroke-linejoin="round"/>
+            </svg>
+        </div>
+        <h1>VINTZ.CO REPORT GENERATOR</h1>
+        <p>Di buat oleh vintz .co untuk mempermudah mereport</p>
+    </div>
+
+    <div class="card">
+        <div class="card-title">📋 PILIH JENIS REPORT</div>
+
+        <div class="form-group">
+            <label for="reportType">JENIS REPORT</label>
+            <select id="reportType" onchange="updateFormLayout()">
+                <option value="godaddy">🌐 GoDaddy Abuse Report</option>
+                <option value="safebrowsing">🛡️ Google Safe Browsing (Standard Phishing)</option>
+                <option value="safebrowsing_brand">🛡️ Google Safe Browsing (Keyword Brand)</option>
+                <option value="safebrowsing_cloaking">🛡️ Google Safe Browsing (Cloaking - Keyword on Page)</option>
+                <option value="searchconsole">🔎 Google Search Console</option>
+                <option value="google_ads">📢 Google Ads Report (Restricted Product / Gambling)</option>
+                <option value="bitly">🔗 Bitly Abuse Report</option>
+                <option value="cuttly">✂️ Cuttly Abuse Report</option>
+                <option value="cloudflare">☁️ Cloudflare Abuse Report</option>
+                <option value="cloudflare_pgdev">☁️ Cloudflare PGDEV (AMP Redirect Chain)</option>
+                <option value="cloudflare_amp_scam">☁️ Cloudflare AMP Scam (Search Poisoning)</option>
+                <option value="cloudflare_amp_cloaking">☁️ Cloudflare AMP Cloaking (Pages.dev)</option>
+                <option value="newfold">🚀 Newfold Digital Abuse Report</option>
+                <option value="pdr">🌐 Public Domain Registry (PDR)</option>
+                <option value="hostinger">🎰 Hostinger Scam / Gambling Abuse Report (GMAIL)</option>
+                <option value="ionos">🌐 IONOS Abuse Report (GMAIL)</option>
+                <option value="netabuse">✉️ NetAbuse Email Report (GMAIL)</option>
+                <option value="both">⚡ Google (Safe Browsing & Search Console)</option>
+            </select>
+        </div>
+
+        <!-- FIELD KHUSUS TARGET BRAND / KEYWORD -->
+        <div class="form-group dynamic-field" id="fieldBrand">
+            <label for="brandName" id="lblBrand">🏷️ TARGET BRAND / KEYWORD NAME</label>
+            <input type="text" id="brandName" placeholder="Contoh: SUSTER123">
+        </div>
+
+        <!-- FIELD KHUSUS TO EMAIL -->
+        <div class="form-group dynamic-field" id="fieldEmailTo">
+            <label for="emailTo">📧 TO EMAIL ADDRESS</label>
+            <input type="text" id="emailTo" placeholder="Contoh: netabuse@as20068.net">
+        </div>
+
+        <!-- FIELD URL MULTIPLE STANDARD -->
+        <div class="form-group dynamic-field" id="fieldStandardUrls">
+            <label id="lblUrls">🔗 MASUKKAN URL REPORTED <small style="color: #666; font-weight: normal;">(Bisa paste banyak baris sekaligus di URL 01)</small></label>
+            <div class="url-row"><div class="url-number">URL 01</div><input type="text" id="url1" placeholder="https://contoh.com/page (Main URL)" onpaste="handlePaste(event)"></div>
+            <div class="url-row"><div class="url-number">URL 02</div><input type="text" id="url2" placeholder="https://contoh.com/page"></div>
+            <div class="url-row"><div class="url-number">URL 03</div><input type="text" id="url3" placeholder="https://contoh.com/page"></div>
+            <div class="url-row"><div class="url-number">URL 04</div><input type="text" id="url4" placeholder="https://contoh.com/page"></div>
+            <div class="url-row"><div class="url-number">URL 05</div><input type="text" id="url5" placeholder="https://contoh.com/page"></div>
+            <div class="counter">Maksimal 5 URL</div>
+        </div>
+
+        <!-- FIELD KHUSUS BITLY -->
+        <div class="form-group dynamic-field" id="fieldBitlyUrls">
+            <label>🔗 BITLY SHORT LINK & EVIDENCE</label>
+            <div class="url-row"><div class="url-number">BITLY</div><input type="text" id="bitlyLink" placeholder="Bitly Short Link"></div>
+            <div class="url-row"><div class="url-number">BUKTI</div><input type="text" id="bitlyEvidence" placeholder="Link Screenshot Bukti"></div>
+        </div>
+
+        <!-- FIELD KHUSUS CUTTLY -->
+        <div class="form-group dynamic-field" id="fieldCuttlyUrls">
+            <label>🔗 CUTTLY SHORT LINK & EVIDENCE</label>
+            <div class="url-row"><div class="url-number">CUTTLY</div><input type="text" id="cuttlyLink" placeholder="Cuttly Short Link"></div>
+            <div class="url-row"><div class="url-number">BUKTI</div><input type="text" id="cuttlyEvidence" placeholder="Link Screenshot Bukti"></div>
+        </div>
+
+        <!-- FIELD KHUSUS GODADDY -->
+        <div class="form-group dynamic-field" id="fieldGodaddyUrls">
+            <label style="color: #00f5ff; font-weight: bold; margin-bottom: 8px; display: block;">🚨 SELECT A CATEGORY BELOW TO GET STARTED</label>
+            <select id="gdAbuseType" style="margin-bottom: 15px;">
+                <option value="Phishing">🎣 Phishing</option>
+                <option value="Malware">🦠 Malware</option>
+                <option value="Child Safety & Exploitation">🛡️ Child Safety & Exploitation</option>
+            </select>
+
+            <label style="color: #00f5ff; font-weight: bold; margin-bottom: 8px; display: block;">🔗 GODADDY REDIRECTION CHAIN & EVIDENCE</label>
+            <div class="url-row"><div class="url-number">REPORTED</div><input type="text" id="gdMain" placeholder="URL, Website, or Domain / Main Landing Domain"></div>
+            <div class="url-row"><div class="url-number">AMP</div><input type="text" id="gdAmp" placeholder="AMP Mobile Version Link"></div>
+            <div class="url-row"><div class="url-number">BUTTON</div><input type="text" id="gdRedirect" placeholder="Button / Redirect Link"></div>
+            <div class="url-row"><div class="url-number">FINAL</div><input type="text" id="gdFinal" placeholder="Final Gambling Destination Link"></div>
+            <div class="url-row"><div class="url-number">BUKTI</div><input type="text" id="gdEvidence" placeholder="Evidence (Screenshots) Link"></div>
+        </div>
+
+        <!-- FIELD KHUSUS NEWFOLD -->
+        <div class="form-group dynamic-field" id="fieldNewfoldUrls">
+            <label style="color: #00f5ff; font-weight: bold; margin-bottom: 8px; display: block;">🚀 NEWFOLD DIGITAL DATA REPORT</label>
+            <div class="url-row"><div class="url-number">DOMAIN</div><input type="text" id="nfDomain" placeholder="Domain with Abuse (https://masukaja.icu/trg)"></div>
+            <div class="url-row"><div class="url-number">INQUIRY</div><input type="text" id="nfInquiry" placeholder="Inquiry Type (PHISHING / ADULT CONTENT OR CSAM)"></div>
+            <div class="url-row"><div class="url-number">BRAND</div><input type="text" id="nfBrand" placeholder="Brand (REGISTER.COM)"></div>
+            <div class="url-row"><div class="url-number">TARGET</div><input type="text" id="nfTargetDomain" placeholder="Target Domain in Comment (anantabagan.com)"></div>
+            <div class="url-row"><div class="url-number">BUKTI</div><input type="text" id="nfAttackFile" placeholder="Attack File Screenshot Link"></div>
+        </div>
+
+        <!-- FIELD KHUSUS PUBLIC DOMAIN REGISTRY (PDR) -->
+        <div class="form-group dynamic-field" id="fieldPdrUrls">
+            <label style="color: #00f5ff; font-weight: bold; margin-bottom: 8px; display: block;">🌐 PUBLIC DOMAIN REGISTRY (PDR) DATA REPORT</label>
+            <div class="url-row"><div class="url-number">DOMAIN</div><input type="text" id="pdrDomain" placeholder="Contoh: www.creativepoint.in"></div>
+            <div class="url-row"><div class="url-number">REPORTED</div><input type="text" id="pdrReportedUrl" placeholder="Contoh: https://www.creativepoint.in/special-offers/"></div>
+            <div class="url-row"><div class="url-number">BRAND</div><input type="text" id="pdrBrand" placeholder="Contoh: PISANG123"></div>
+            <div class="url-row"><div class="url-number">SCREENSHOT</div><input type="text" id="pdrScreenshot" placeholder="Contoh: https://prnt.sc/s5lIzYsF1plm"></div>
+        </div>
+
+        <!-- FIELD KHUSUS HOSTINGER SCAM -->
+        <div class="form-group dynamic-field" id="fieldHostingerUrls">
+            <label>🎰 HOSTINGER SCAM DATA REPORT</label>
+            <div class="url-row"><div class="url-number">DESKTOP</div><input type="text" id="hosDesktop" placeholder="Desktop Link"></div>
+            <div class="url-row"><div class="url-number">AMP</div><input type="text" id="hosAmp" placeholder="AMP Link / Domain"></div>
+            <div class="url-row"><div class="url-number">BUKTI</div><input type="text" id="hosEvidence" placeholder="Link Screenshot Bukti"></div>
+        </div>
+
+        <!-- FIELD KHUSUS IONOS GMAIL REPORT -->
+        <div class="form-group dynamic-field" id="fieldIonosUrls">
+            <label style="color: #00f5ff; font-weight: bold; margin-bottom: 8px; display: block;">🌐 IONOS ATTACK FLOW & EVIDENCE DATA</label>
+            <div class="url-row"><div class="url-number">REPORTED</div><input type="text" id="ioReportedUrl" placeholder="Reported URL / Entry Page (Hosted on IONOS)"></div>
+            <div class="url-row"><div class="url-number">AMP</div><input type="text" id="ioAmp" placeholder="AMP Cloaking Layer Link"></div>
+            <div class="url-row"><div class="url-number">REDIRECT</div><input type="text" id="ioRedirect" placeholder="Redirect Endpoint Link"></div>
+            <div class="url-row"><div class="url-number">FINAL</div><input type="text" id="ioFinal" placeholder="Final Destination Link"></div>
+            <div class="url-row"><div class="url-number">BUKTI 1</div><input type="text" id="ioEvidence1" placeholder="Link Screenshot Bukti 1"></div>
+            <div class="url-row"><div class="url-number">BUKTI 2</div><input type="text" id="ioEvidence2" placeholder="Link Screenshot Bukti 2"></div>
+            <div class="url-row"><div class="url-number">BUKTI 3</div><input type="text" id="ioEvidence3" placeholder="Link Screenshot Bukti 3"></div>
+        </div>
+
+        <!-- FIELD KHUSUS CLOUDFLARE PGDEV -->
+        <div class="form-group dynamic-field" id="fieldCfPgdevUrls">
+            <label>☁️ CLOUDFLARE PGDEV AMP REDIRECT DATA</label>
+            <div class="url-row"><div class="url-number">EVIDENCE</div><input type="text" id="cfPgEvidences" placeholder="Evidence URLs"></div>
+            <div class="url-row"><div class="url-number">AMP PAGE</div><input type="text" id="cfPgAmp" placeholder="Google AMP Page URL"></div>
+            <div class="url-row"><div class="url-number">REDIRECT</div><input type="text" id="cfPgRedirect" placeholder="Redirect / Button URL"></div>
+            <div class="url-row"><div class="url-number">FINAL</div><input type="text" id="cfPgFinal" placeholder="Final Destination URL"></div>
+        </div>
+
+        <!-- FIELD KHUSUS CLOUDFLARE AMP SCAM -->
+        <div class="form-group dynamic-field" id="fieldCfAmpScamUrls">
+            <label>☁️ CLOUDFLARE AMP SCAM (SEARCH POISONING)</label>
+            <div class="url-row"><div class="url-number">EVIDENCE</div><input type="text" id="cfAmpScamEvidence" placeholder="https://setelankuat.vip"></div>
+            <div class="url-row"><div class="url-number">GATEWAY</div><input type="text" id="cfAmpScamGateway" placeholder="Primary Entry Gateway (https://knbepc.co.zm)"></div>
+            <div class="url-row"><div class="url-number">AMP BRIDGE</div><input type="text" id="cfAmpScamBridge" placeholder="Cloudflare Mobile AMP Bridge (https://setelankuat.vip)"></div>
+            <div class="url-row"><div class="url-number">BUTTON</div><input type="text" id="cfAmpScamButton" placeholder="Intermediary Malicious Button (https://mbgque.lol)"></div>
+            <div class="url-row"><div class="url-number">FINAL</div><input type="text" id="cfAmpScamFinal" placeholder="Rogue Scam Destination (https://nagamas33.bid)"></div>
+        </div>
+
+        <!-- FIELD KHUSUS CLOUDFLARE AMP CLOAKING -->
+        <div class="form-group dynamic-field" id="fieldCfAmpCloakingUrls">
+            <label>☁️ CLOUDFLARE AMP CLOAKING (PAGES.DEV)</label>
+            <div class="url-row"><div class="url-number">EVIDENCE</div><input type="text" id="cfAmpCloakingEvidence" placeholder="https://www.google.com/amp/s/ibu-suster-cantik.pages.dev/SUSTER123"></div>
+        </div>
+
+        <div class="buttons">
+            <button class="generate" onclick="generateReport()">⚡ GENERATE REPORT</button>
+            <button class="copy" id="copyBtn" onclick="copyReport()">📋 COPY</button>
+            <button class="reset" onclick="resetForm()">🔄 RESET</button>
+        </div>
+
+        <div id="message" class="message"></div>
+    </div>
+
+    <div class="card">
+        <div class="card-title">📄 HASIL REPORT</div>
+        <textarea id="result" placeholder="Hasil report akan muncul di sini..."></textarea>
+    </div>
+
+    <div class="footer">
+        VINTZ.CO REPORT GENERATOR
+    </div>
+
+</div>
+
+<script>
+function updateFormLayout() {
+    let reportType = document.getElementById("reportType").value;
+
+    document.getElementById("fieldBrand").style.display = "none";
+    document.getElementById("fieldEmailTo").style.display = "none";
+    document.getElementById("fieldStandardUrls").style.display = "none";
+    document.getElementById("fieldBitlyUrls").style.display = "none";
+    document.getElementById("fieldCuttlyUrls").style.display = "none";
+    document.getElementById("fieldGodaddyUrls").style.display = "none";
+    document.getElementById("fieldNewfoldUrls").style.display = "none";
+    document.getElementById("fieldPdrUrls").style.display = "none";
+    document.getElementById("fieldHostingerUrls").style.display = "none";
+    document.getElementById("fieldIonosUrls").style.display = "none";
+    document.getElementById("fieldCfPgdevUrls").style.display = "none";
+    document.getElementById("fieldCfAmpScamUrls").style.display = "none";
+    document.getElementById("fieldCfAmpCloakingUrls").style.display = "none";
+
+    // Label reset
+    document.getElementById("lblBrand").innerHTML = "🏷️ TARGET BRAND / COMPANY NAME";
+    document.getElementById("lblUrls").innerHTML = "🔗 MASUKKAN URL REPORTED <small style=\"color: #666; font-weight: normal;\">(Bisa paste banyak baris sekaligus di URL 01)</small>";
+
+    if (["safebrowsing", "safebrowsing_cloaking", "searchconsole", "both"].includes(reportType)) {
+        document.getElementById("fieldStandardUrls").style.display = "block";
+    } else if (reportType === "google_ads") {
+        document.getElementById("lblBrand").innerHTML = "🏷️ KEYWORD / TARGET BRAND";
+        document.getElementById("lblUrls").innerHTML = "📢 AD OR LISTING LINK <small style=\"color: #666; font-weight: normal;\">(Maksimal 5 link)</small>";
+        document.getElementById("fieldBrand").style.display = "block";
+        document.getElementById("fieldStandardUrls").style.display = "block";
+    } else if (reportType === "safebrowsing_brand") {
+        document.getElementById("fieldBrand").style.display = "block";
+        document.getElementById("fieldStandardUrls").style.display = "block";
+    } else if (reportType === "netabuse") {
+        document.getElementById("fieldEmailTo").style.display = "block";
+        document.getElementById("fieldStandardUrls").style.display = "block";
+    } else if (reportType === "cloudflare") {
+        document.getElementById("fieldBrand").style.display = "block";
+        document.getElementById("fieldStandardUrls").style.display = "block";
+    } else if (reportType === "cloudflare_pgdev") {
+        document.getElementById("fieldBrand").style.display = "block";
+        document.getElementById("fieldCfPgdevUrls").style.display = "block";
+    } else if (reportType === "cloudflare_amp_scam") {
+        document.getElementById("fieldBrand").style.display = "block";
+        document.getElementById("fieldCfAmpScamUrls").style.display = "block";
+    } else if (reportType === "cloudflare_amp_cloaking") {
+        document.getElementById("fieldBrand").style.display = "block";
+        document.getElementById("fieldCfAmpCloakingUrls").style.display = "block";
+    } else if (reportType === "bitly") {
+        document.getElementById("fieldBitlyUrls").style.display = "block";
+    } else if (reportType === "cuttly") {
+        document.getElementById("fieldCuttlyUrls").style.display = "block";
+    } else if (reportType === "godaddy") {
+        document.getElementById("fieldBrand").style.display = "block";
+        document.getElementById("fieldGodaddyUrls").style.display = "block";
+    } else if (reportType === "newfold") {
+        document.getElementById("fieldNewfoldUrls").style.display = "block";
+    } else if (reportType === "pdr") {
+        document.getElementById("fieldPdrUrls").style.display = "block";
+    } else if (reportType === "hostinger") {
+        document.getElementById("fieldHostingerUrls").style.display = "block";
+    } else if (reportType === "ionos") {
+        document.getElementById("fieldBrand").style.display = "block";
+        document.getElementById("fieldIonosUrls").style.display = "block";
+    }
+}
+
+window.onload = function() {
+    updateFormLayout();
+};
+
+function handlePaste(e) {
+    let clipboardData = e.clipboardData || window.clipboardData;
+    let pastedData = clipboardData.getData('Text');
+    let lines = pastedData.split(/\r?\n/).map(line => line.trim()).filter(line => line !== "");
+
+    if (lines.length > 1) {
+        e.preventDefault();
+        for (let i = 0; i < Math.min(lines.length, 5); i++) {
+            document.getElementById("url" + (i + 1)).value = lines[i];
+        }
+        showMessage("⚡ " + Math.min(lines.length, 5) + " URL berhasil ditempelkan secara otomatis.", "success");
+    }
+}
+
+function getStandardUrls() {
+    let urls = [];
+    for (let i = 1; i <= 5; i++) {
+        let value = document.getElementById("url" + i).value.trim();
+        if (value !== "") {
+            if (!value.startsWith("http://") && !value.startsWith("https://")) {
+                value = "https://" + value;
+            }
+            urls.push(value);
+        }
+    }
+    return urls;
+}
+
+function createGoogleAdsReport(urls) {
+    let keyword = document.getElementById("brandName").value.trim() || "[KEYWORD]";
+    let urlList = "";
+    urls.forEach(url => {
+        urlList += `- ${url}\n`;
+    });
+
+    return `Mohon dibantu untuk report ADS berikut melalui :\n\nhttps://support.google.com/ads/troubleshooter/4578507\n\nWhich of these best describes the ad or listing?\nit violates Google Policies\n\n✅It promotes a restricted product or service\n\nAd or listing link (do not change if prefilled) *\n${urlList}\nISI :\nHello Google , I would like to quickly remove the phishing and trademark violation because he used the keyword ${keyword}. Please takedown this gambling site immediately, because it will have bad impact on many people, especially the younger generation. Moreover or takedown the website is doing phising which is clearly a prohibited action\n\nTerima kasih atas waktunya team`;
+}
+
+function createSafeBrowsingLink(url) {
+    return "https://safebrowsing.google.com/safebrowsing/report_phish/?url=" + encodeURIComponent(url);
+}
+
+function createSafeBrowsingReport(urls, mode = "standard") {
+    let report = `Tolong bantu HANTAMKAN phising dibawah ini ya team♡\n⪼───────⪼───────⪼───────⪼───────⪼───────⪼───────⪼\nmohon di bantu report melalui :\n\n`;
+
+    urls.forEach((url) => {
+        report += `${createSafeBrowsingLink(url)}\n\n`;
+    });
+
+    let details = "";
+    if (mode === "brand") {
+        let brand = document.getElementById("brandName").value.trim() || "[COMPANY NAME]";
+        details = `Hello Google, I would like to quickly remove the phishing and trademark violation because he used the keyword ${brand}. Please act immediately and remove it as soon as possible as phishing and trademarking are strictly prohibited.`;
+    } else if (mode === "cloaking") {
+        details = `This page is involved in deceptive behavior and appears to use cloaking techniques, hidden keywords, and spam content to manipulate search engine rankings. The website abuses the reputation of an existing or expired domain to attract traffic and redirects visitors to an illegal online gambling website. The content presented to search engines differs from what regular users receive, indicating site reputation abuse and deceptive redirection practices. This behavior is intended to mislead users, evade detection, and artificially gain visibility in search results. Please review this site as a Social Engineering threat and deceptive content.`;
+    } else {
+        details = `I would like to report a website suspected of engaging in phishing activities, online fraud, and identity impersonation intended to steal user information. The website appears to use deceptive keywords, misleading content, and fake interfaces resembling legitimate services in order to trick users into submitting sensitive information such as usernames, passwords, OTP codes, banking details, and other personal data. I respectfully request that Google Safe Browsing review, investigate, and take appropriate action against the reported domain or URLs in accordance with internet security and user protection policies.`;
+    }
+
+    report += `Report Type\n✅ This page is not safe\n\nThreat Type\n✅ Social Engineering\n\nThreat Category\n✅ Other Phishing\n\nAdditional details :\n${details}\n\nTerimakasih atas waktunya team♡`;
+    return report;
+}
+
+function createSearchConsoleReport(urls) {
+    let report = `HALLO TEAM, Mohon di bantu untuk luangkan waktu sebentar untuk report link di bawah ini ya team 🙏\n\nReport melalui link :\nhttps://search.google.com/search-console/report-spam?hl=id\n\nURL Halaman :\n\n`;
+    urls.forEach((url, index) => { report += `Link ${index + 1}: \n${url}\n\n`; });
+    report += `Apa yang salah dengan halaman ini?:\n- Halaman terlibat dalam perilaku spam\n\nApa masalah sebenarnya? :\n- Penyelubungan dan pengalihan tersembunyi\n- Link dan teks tersembunyi\n- Penyalahgunaan reputasi situs\n\nDetail tambahan :\nPHISHING SITE AND GAMBLING SITE\n\nAPAKAH ADA HAL LAIN YANG PERLU KAMI KETAHUI ??:\n\nLINK TERSEBUT DIDUGA MERUGIKAN PENGGUNA DENGAN MENGARAHKAN PENGUNJUNG KE KONTEN YANG BERPOTENSI MELANGGAR KEBIJAKAN. KAMI MEMOHON AGAR TIM GOOGLE DAPAT MENINJAU URL TERSEBUT DAN MENGAMBIL TINDAKAN YANG SESUAI APABILA DITEMUKAN PELANGGARAN.\n\nTerimakasih atas waktunya team♡\n`;
+    return report;
+}
+
+function createBitlyReport() {
+    let bitlyLink = document.getElementById("bitlyLink").value.trim() || "[BITLY LINK]";
+    let bitlyEvidence = document.getElementById("bitlyEvidence").value.trim() || "[LINK SCREENSHOT]";
+
+    return `Halo team dibantu luangkan waktunya sebentar untuk spam report link dibawah ini ya team 🔥\n\nhttps://bitly.com/pages/trust/report-abuse\nName: isi nama depan dan belakang\nEmail Address: isi email kerja\n Type of report \n - Link\n Type of abuse\n - Phishing\n Bitly short link you are reporting:\n${bitlyLink}\n Reason you are reporting this to Bitly:\n Evidence screenshot:\n${bitlyEvidence}\n \nThe reported bit.ly short link is being misused to redirect users to an illegal online gambling website.\n\n This shortlink hides the final destination and is used to mislead users into accessing real-money gambling content, which violates acceptable use policies and may cause harm to users.\n\n We have verified the redirection behavior and attached screenshot evidence showing the final gambling destination.\n\n We kindly request immediate investigation and takedown of the abusive shortlink to prevent further misuse.\n\n ✅ I have read Privacy Policy\n\n Thanks team`;
+}
+
+function createCuttlyReport() {
+    let cuttlyLink = document.getElementById("cuttlyLink").value.trim() || "[CUTTLY LINK]";
+    let cuttlyEvidence = document.getElementById("cuttlyEvidence").value.trim() || "[LINK SCREENSHOT]";
+
+    return `Halo Team, mohon di luangkan waktunya sebentar untuk bantu report\n\nREPORT MELALUI :\nhttps://cutt.ly/report\n\nName : Bebas\nEmail address : Email Kerja\n\nSuspicious short link :\n${cuttlyLink}\n\nSelect a reason for reporting\n✅ Suspicious\n\nDetails :\nEvidence screenshot:\n${cuttlyEvidence}\n\nThe reported cutt.ly short link is being misused to redirect users to an illegal online gambling website.\n\nThis shortlink hides the final destination and is used to mislead users into accessing real-money gambling content, which violates acceptable use policies and may cause harm to users.\n\nWe have verified the redirection behavior and attached screenshot evidence showing the final gambling destination.\n\nWe kindly request immediate investigation and takedown of the abusive shortlink to prevent further misuse.\n\n✅ I have read Privacy Policy\n\nThanks team.`;
+}
+
+function createNetabuseReport(urls) {
+    let emailTo = document.getElementById("emailTo").value.trim() || "netabuse@as20068.net";
+    let urlList = "";
+    urls.forEach(url => { urlList += `${url}\n`; });
+
+    return `Halo Team, mohon di luangkan waktunya sebentar untuk bantu report\n\nReport Melalui : GMAIL\n\nTo :\t${emailTo}\n\nSubject: \nPhishing Website Hosted on Your Network – Abuse Report\n\nEmail Body: \nDear Abuse Team,\nI would like to report a website hosted on your network that appears to be involved in phishing and online fraud.\nThe reported website is suspected of impersonating legitimate services and directing users to fraudulent pages designed to steal sensitive information such as usernames, passwords, OTP codes, and financial details.\n\nReported URL:\n${urlList}\nObserved activities include:\n- Phishing\n- Identity impersonation\n- Online fraud\n- Deceptive content\n- Possible credential theft\nThis website may pose a significant security risk to internet users and appears to violate your Acceptable Use Policy.\nI respectfully request that you investigate this matter and take appropriate action if the reported content is found to be malicious.\n\nThank you for your time and assistance.\n\nThanks team.`;
+}
+
+function createCloudflareReport(urls) {
+    let brand = document.getElementById("brandName").value.trim().toUpperCase() || "[COMPANY NAME]";
+    let evidenceList = "";
+    urls.forEach(url => { evidenceList += `-  ${url}\n`; });
+
+    return `Hello team dibantu spam report link dibawah ini ya team♡\n⫘⫘⫘⫘⊹ ﹏𓊝﹏𓂁﹏⊹ ˖⫘⫘⫘⫘\nREPORT MELALUI : https://abuse.cloudflare.com/phishing\n\nYOUR FULL NAME : NAMA APAPUN\nYOUR EMAIL : EMAIL KERJA\nCONFIRM EMAIL : ULANGI EMAIL KERJA\nTITLE : \nURGENT – Phishing, SEO Spam, Brand Abuse and Deceptive Redirect Activity via Cloudflare-Managed Resources\n \nCOMPANY NAME : ${brand}\nTELEPHONE : -\n \nEVIDENCE URLs :\n${evidenceList}\nLOGS OR OTHER EVIDENCE OF ABUSE :\nThis website is engaging in active phishing, SEO poisoning, and brand impersonation. It abuses Cloudflare's network to deliver deceptive content and redirect users to unauthorized third-party platforms.\n\nRequested Action: Please inspect and terminate Cloudflare proxy and hosting services for these resources immediately.\n\nTerimakasih atas waktunya team♡`;
+}
+
+function createCloudflarePgdevReport() {
+    let brand = document.getElementById("brandName").value.trim().toUpperCase() || "[COMPANY NAME]";
+    let evidence = document.getElementById("cfPgEvidences").value.trim() || "[EVIDENCE URL]";
+    let amp = document.getElementById("cfPgAmp").value.trim() || "[AMP PAGE URL]";
+    let redirect = document.getElementById("cfPgRedirect").value.trim() || "[REDIRECT URL]";
+    let final = document.getElementById("cfPgFinal").value.trim() || "[FINAL URL]";
+
+    return `Hello team dibantu spam report link dibawah ini ya team♡\n⫘⫘⫘⫘⊹ ﹏𓊝﹏𓂁﹏⊹ ˖⫘⫘⫘⫘\nREPORT MELALUI : https://abuse.cloudflare.com/phishing\n\nYOUR FULL NAME : NAMA APAPUN\nYOUR EMAIL : EMAIL KERJA\nCONFIRM EMAIL : ULANGI EMAIL KERJA\nTITLE : \nURGENT – AMP Cloaking & Deceptive Redirect Chain targeting ${brand}\n\nCOMPANY NAME : ${brand}\nTELEPHONE : -\n\nEVIDENCE URLs :\n- ${evidence}\n\nLOGS OR OTHER EVIDENCE OF ABUSE :\n1. AMP Page Layer: ${amp}\n2. Redirect Endpoint: ${redirect}\n3. Final Destination: ${final}\n\nThe target domain is utilizing Cloudflare Pages (.pages.dev) to host AMP cloaking layers that bypass search detection and redirect visitors to unauthorized gambling/scam portals.\n\nRequested Action: Takedown pages.dev deployment and suspend associated Cloudflare worker/host accounts immediately.\n\nTerimakasih atas waktunya team♡`;
+}
+
+function createCloudflareAmpScamReport() {
+    let brand = document.getElementById("brandName").value.trim() || "SUSTER123 Digital Group";
+    let evidence = document.getElementById("cfAmpScamEvidence").value.trim() || "https://setelankuat.vip";
+    let gateway = document.getElementById("cfAmpScamGateway").value.trim() || "https://knbepc.co.zm";
+    let bridge = document.getElementById("cfAmpScamBridge").value.trim() || "https://setelankuat.vip";
+    let button = document.getElementById("cfAmpScamButton").value.trim() || "https://mbgque.lol";
+    let final = document.getElementById("cfAmpScamFinal").value.trim() || "https://nagamas33.bid";
+
+    let ampTarget = bridge ? bridge : "AMP";
+
+    return `REPORT CLOUDFLARE AMP SCAM
+REPORT MELALUI : https://abuse.cloudflare.com/phishing
+
+Your full name : ISI NAMA
+Your email address : ISI JIKA LIMIT GANTI EMAIL
+Confirm email address : ULANGI EMAIL KERJA
+Title : Chief of Anti-Phishing & Brand Enforcement
+COMPANY NAME : ${brand}
+
+Evidence URLs : ${evidence}
+
+Dear Cloudflare Trust & Safety Team,
+
+We are launching a critical abuse notification regarding a highly malicious search-poisoning and phishing infrastructure utilizing Cloudflare's proxy network. The specific domain "${evidence}" is actively acting as a fraudulent mobile AMP gateway to systematically hijack traffic from our brand, ${brand}.
+
+HIGH-ALERT IMPACT AND SEVERE ENTERPRISE DAMAGES:
+1. Search Engine Poisoning & Rank 1 Hijacking: The threat actors have deployed aggressive SEO-manipulation scripts on this Cloudflare-shielded asset. This has enabled them to illegitimately achieve Rank 1 on Google search results for our trademarked brand "${brand}", fully diverting our organic customer base.
+2. Mass Consumer Exploitation: Because this malicious link sits at the absolute top of search engine indexes, thousands of unsuspecting public users are being deceived daily into accessing a cloned environment under the false impression of brand legitimacy.
+3. Forced Rogue Redirection Funnel: The infrastructure hosted here immediately intercepts mobile users, forcing them through highly deceptive button triggers that tunnel traffic into unverified third-party gambling networks .
+
+COMPLETE MALICIOUS ATTACK GEOMETRY:
+- Primary Entry Gateway: ${gateway}
+- Cloudflare Mobile AMP Bridge: ${bridge}
+- Intermediary Malicious Button: ${button}
+- Rogue Scam Destination: ${final}
+
+This operations architecture heavily violates fair digital commerce practices and stands in direct violation of Cloudflare's Acceptable Use Policy (AUP) concerning phishing and deceptive schemes. As the victimized trademark owner, we demand immediate investigation and network suspension of "${ampTarget}" to neutralize this high-risk threat.
+
+Targeted Brand :
+${brand} (Official Digital Entertainment Brand)
+
+Reporter current country :
+INDONESIA
+
+User agent :
+Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/149.0.0.0 Safari/537.36
+
+Comments :
+This is an active cyber emergency of the highest order. The domain is executing active search engine deception that severely cripples our operational integrity and compromises data privacy for mainstream users. Immediate operational containment under Cloudflare’s zero-tolerance security guidelines is requested.
+
+✅
+✅
+
+✅
+submit
+
+Terima kasih atas waktunya dan tetap semangat ya team🙏`;
+}
+
+function createCloudflareAmpCloakingReport() {
+    let brand = document.getElementById("brandName").value.trim() || "SUSTER123";
+    let evidence = document.getElementById("cfAmpCloakingEvidence").value.trim() || "https://www.google.com/amp/s/ibu-suster-cantik.pages.dev/SUSTER123";
+    let ua = "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/149.0.0.0 Safari/537.36";
+
+    return `REPORT CLOUDFLARE AMP CLOAKING
+REPORT MELALUI : https://abuse.cloudflare.com/phishing
+
+
+Your full name : ISI NAMA
+Your email address : ISI JIKA LIMIT GANTI EMAIL
+Confirm email address : ULANGI EMAIL KERJA
+Title : Phishing Website Impersonating ${brand} Brand
+COMPANY NAME : ${brand}
+
+Evidence URLs : ${evidence}
+
+Logs or other evidence of abuse :
+The reported URL is a phishing and brand impersonation website abusing the ${brand} brand identity without authorization.
+
+The site is designed to mislead users into believing that it is affiliated with or operated by ${brand}. Visitors are presented with fraudulent content, misleading branding elements, and redirection mechanisms intended to lure users toward external gambling/scam platforms.
+
+This abuse creates a significant risk of user deception, credential theft, financial loss, and reputational damage to the legitimate ${brand} brand. Users searching for or attempting to access the legitimate ${brand} service may mistakenly interact with the fraudulent website and be redirected to unauthorized third-party destinations.
+
+The reported Pages.dev URL is being used as part of a phishing chain that impersonates a legitimate brand in order to gain user trust and facilitate fraudulent activity.
+
+Requested action: Immediate investigation and suspension of the reported Pages.dev project for violation of Cloudflare's abuse policies regarding phishing, fraud, brand impersonation, and deceptive practices.
+
+
+Targeted Brand :
+${brand}
+The website impersonates and abuses the ${brand} brand name in order to deceive users into believing the content is associated with the legitimate service.
+
+Reporter current country :
+INDONESIA
+
+User agent :
+${ua}
+
+Comments :
+This Pages.dev website is not authorized by the ${brand} brand and appears to be part of a phishing/scam operation.
+
+The operator is exploiting the reputation and recognition of ${brand} to attract victims through deceptive branding and misleading content. Such activity damages the legitimate brand, causes confusion among users, and may result in financial harm to individuals who are redirected to fraudulent gambling or scam-related destinations.
+
+Please investigate this Pages.dev project and take appropriate enforcement action in accordance with Cloudflare's phishing and abuse policies.
+
+
+Terima kasih atas waktunya dan tetap semangat ya team🙏`;
+}
+
+function createGoDaddyReport() {
+    let brand = document.getElementById("brandName").value.trim().toUpperCase() || "[COMPANY NAME]";
+    let abuseType = document.getElementById("gdAbuseType").value;
+    let main = document.getElementById("gdMain").value.trim() || "[MAIN URL]";
+    let amp = document.getElementById("gdAmp").value.trim() || "[AMP LINK]";
+    let redirect = document.getElementById("gdRedirect").value.trim() || "[REDIRECT LINK]";
+    let final = document.getElementById("gdFinal").value.trim() || "[FINAL LINK]";
+    let evidence = document.getElementById("gdEvidence").value.trim() || "[EVIDENCE LINK]";
+
+    return `Halo Team, mohon di luangkan waktunya sebentar untuk bantu report\n\nREPORT MELALUI : https://be.godaddy.com/abuse/report\n\nSELECT A CATEGORY BELOW TO GET STARTED:\n✅ ${abuseType}\n\nURL, Website, or Domain:\n${main}\n\nPLEASE ENTER ANY LOGS OR OTHER EVIDENCE OF ABUSE:\nMain Domain: ${main}\nAMP Version: ${amp}\nRedirect Button: ${redirect}\nFinal Destination: ${final}\nEvidence Screenshot: ${evidence}\n\nAdditional Details:\nThe domain hosted/registered with GoDaddy is serving as an entryway for phishing and brand exploitation targeting ${brand}. The page employs sneaky redirects leading users into illegal gambling activities.\n\nWe urge GoDaddy Abuse Team to suspend this domain to uphold network security standards.\n\nThanks team.`;
+}
+
+function createNewfoldReport() {
+    let domain = document.getElementById("nfDomain").value.trim() || "[DOMAIN]";
+    let inquiry = document.getElementById("nfInquiry").value.trim().toUpperCase() || "PHISHING";
+    let brand = document.getElementById("nfBrand").value.trim().toUpperCase() || "REGISTER.COM";
+    let targetDomain = document.getElementById("nfTargetDomain").value.trim() || "[TARGET DOMAIN]";
+    let attackFile = document.getElementById("nfAttackFile").value.trim() || "[ATTACK FILE LINK]";
+
+    return `Halo Team, mohon di luangkan waktunya sebentar untuk bantu report\n\nREPORT MELALUI : https://www.register.com/change-request/report-abuse\n\nDomain with Abuse:\n${domain}\n\nInquiry Type:\n✅ ${inquiry}\n\nBrand:\n${brand}\n\nTarget Domain / Comments:\nTarget Domain: ${targetDomain}\nEvidence Screenshot: ${attackFile}\n\nThe domain above is currently used for malicious redirection, phishing attacks, and brand keyword abuse. Please take down the malicious content and suspend the involved service.\n\nThanks team.`;
+}
+
+function createPdrReport() {
+    let domain = document.getElementById("pdrDomain").value.trim() || "[DOMAIN]";
+    let reportedUrl = document.getElementById("pdrReportedUrl").value.trim() || "[REPORTED URL]";
+    let brand = document.getElementById("pdrBrand").value.trim().toUpperCase() || "[BRAND]";
+    let screenshot = document.getElementById("pdrScreenshot").value.trim() || "[SCREENSHOT LINK]";
+
+    return `Halo Team, mohon di luangkan waktunya sebentar untuk bantu report\n\nREPORT MELALUI : https://publicdomainregistry.com/report-abuse/\n\nDomain Name:\n${domain}\n\nReported URL:\n${reportedUrl}\n\nAbuse Type:\n✅ Phishing / Brand Abuse (${brand})\n\nScreenshot Evidence:\n${screenshot}\n\nDetailed Description:\nThis domain registered under Public Domain Registry is conducting malicious activity by hijacking search keywords for brand "${brand}" and redirecting unsuspected visitors to an illegal gambling site.\n\nKindly investigate and initiate takedown procedures.\n\nThanks team.`;
+}
+
+function createHostingerReport() {
+    let desktop = document.getElementById("hosDesktop").value.trim() || "[DESKTOP LINK]";
+    let amp = document.getElementById("hosAmp").value.trim() || "[AMP LINK]";
+    let evidence = document.getElementById("hosEvidence").value.trim() || "[EVIDENCE LINK]";
+
+    return `Halo Team, mohon di luangkan waktunya sebentar untuk bantu report\n\nReport Melalui : GMAIL\n\nTo :\tabuse@hostinger.com\n\nSubject:\nUrgent Abuse Report - Illegal Gambling & Phishing Hosting\n\nBody:\nDear Hostinger Abuse Team,\n\nWe would like to report an active policy violation hosted on Hostinger infrastructure.\n\nDesktop Landing: ${desktop}\nAMP Layer: ${amp}\nEvidence Screenshot: ${evidence}\n\nThis account is deploying cloaked pages and malicious redirects to send users to unauthorized online gambling services.\n\nPlease process an immediate account review and takedown.\n\nThanks team.`;
+}
+
+function createIonosReport() {
+    let brand = document.getElementById("brandName").value.trim().toUpperCase() || "[COMPANY NAME]";
+    let reported = document.getElementById("ioReportedUrl").value.trim() || "[REPORTED URL]";
+    let amp = document.getElementById("ioAmp").value.trim() || "[AMP LINK]";
+    let redirect = document.getElementById("ioRedirect").value.trim() || "[REDIRECT LINK]";
+    let final = document.getElementById("ioFinal").value.trim() || "[FINAL LINK]";
+    let ev1 = document.getElementById("ioEvidence1").value.trim() || "[EVIDENCE 1]";
+    let ev2 = document.getElementById("ioEvidence2").value.trim() || "";
+    let ev3 = document.getElementById("ioEvidence3").value.trim() || "";
+
+    let evidences = `- Evidence 1: ${ev1}\n`;
+    if (ev2 !== "") evidences += `- Evidence 2: ${ev2}\n`;
+    if (ev3 !== "") evidences += `- Evidence 3: ${ev3}\n`;
+
+    return `Halo Team, mohon di luangkan waktunya sebentar untuk bantu report\n\nReport Melalui : GMAIL\n\nTo :\tabuse@ionos.com\n\nSubject:\nUrgent Abuse Report - Phishing, AMP Cloaking & Brand Abuse (${brand})\n\nBody:\nDear IONOS Abuse Team,\n\nWe are writing to report a malicious website hosted under IONOS network that violates your Acceptable Use Policy.\n\nReported Entry Page: ${reported}\nAMP Cloaking Layer: ${amp}\nRedirect Endpoint: ${redirect}\nFinal Destination: ${final}\n\nEvidence Screenshots:\n${evidences}\n\nThe page uses deceptive keywords and cloaking techniques to trick users searching for "${brand}" into visiting scam/gambling platforms.\n\nPlease terminate hosting services for this reported asset immediately.\n\nThanks team.`;
+}
+
+function generateReport() {
+    let reportType = document.getElementById("reportType").value;
+    let output = "";
+
+    if (["safebrowsing", "safebrowsing_brand", "safebrowsing_cloaking", "searchconsole", "google_ads", "netabuse", "cloudflare", "both"].includes(reportType)) {
+        let urls = getStandardUrls();
+        if (urls.length === 0 && reportType !== "both") {
+            showMessage("❌ Masukkan minimal 1 URL untuk membuat report!", "error");
+            return;
+        }
+
+        if (reportType === "safebrowsing") {
+            output = createSafeBrowsingReport(urls, "standard");
+        } else if (reportType === "safebrowsing_brand") {
+            output = createSafeBrowsingReport(urls, "brand");
+        } else if (reportType === "safebrowsing_cloaking") {
+            output = createSafeBrowsingReport(urls, "cloaking");
+        } else if (reportType === "searchconsole") {
+            output = createSearchConsoleReport(urls);
+        } else if (reportType === "google_ads") {
+            output = createGoogleAdsReport(urls);
+        } else if (reportType === "netabuse") {
+            output = createNetabuseReport(urls);
+        } else if (reportType === "cloudflare") {
+            output = createCloudflareReport(urls);
+        } else if (reportType === "both") {
+            if (urls.length === 0) {
+                showMessage("❌ Masukkan minimal 1 URL untuk membuat report!", "error");
+                return;
+            }
+            output = createSafeBrowsingReport(urls, "standard") + "\n\n" + "═".repeat(40) + "\n\n" + createSearchConsoleReport(urls);
+        }
+    } else if (reportType === "bitly") {
+        output = createBitlyReport();
+    } else if (reportType === "cuttly") {
+        output = createCuttlyReport();
+    } else if (reportType === "cloudflare_pgdev") {
+        output = createCloudflarePgdevReport();
+    } else if (reportType === "cloudflare_amp_scam") {
+        output = createCloudflareAmpScamReport();
+    } else if (reportType === "cloudflare_amp_cloaking") {
+        output = createCloudflareAmpCloakingReport();
+    } else if (reportType === "godaddy") {
+        output = createGoDaddyReport();
+    } else if (reportType === "newfold") {
+        output = createNewfoldReport();
+    } else if (reportType === "pdr") {
+        output = createPdrReport();
+    } else if (reportType === "hostinger") {
+        output = createHostingerReport();
+    } else if (reportType === "ionos") {
+        output = createIonosReport();
+    }
+
+    document.getElementById("result").value = output;
+    showMessage("✅ Report berhasil dibuat! Silakan salin hasil di bawah.", "success");
+}
+
+function copyReport() {
+    let resultText = document.getElementById("result");
+    if (!resultText.value.trim()) {
+        showMessage("❌ Tidak ada teks report untuk disalin!", "error");
+        return;
+    }
+
+    resultText.select();
+    resultText.setSelectionRange(0, 99999);
+    navigator.clipboard.writeText(resultText.value).then(() => {
+        showMessage("📋 Hasil report berhasil disalin ke clipboard!", "success");
+    }).catch(err => {
+        showMessage("❌ Gagal menyalin secara otomatis. Silakan salin manual.", "error");
+    });
+}
+
+function resetForm() {
+    let inputs = document.querySelectorAll("input[type='text'], textarea");
+    inputs.forEach(input => input.value = "");
+    document.getElementById("message").style.display = "none";
+    showMessage("🔄 Form telah direset.", "success");
+}
+
+function showMessage(msg, type) {
+    let msgDiv = document.getElementById("message");
+    msgDiv.innerHTML = msg;
+    msgDiv.className = "message " + type;
+    msgDiv.style.display = "block";
+
+    setTimeout(() => {
+        msgDiv.style.display = "none";
+    }, 4000);
+}
+</script>
+
+</body>
+</html>
